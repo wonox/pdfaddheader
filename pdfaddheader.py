@@ -34,6 +34,7 @@ parser.add_argument(
     help='footer部分のテキスト',
     required=True)
 
+
 def pdfaddheader(path, header_text, footer_text):
     # フォントの設定
     font_name = "HeiseiKakuGo-W5"
@@ -46,20 +47,34 @@ def pdfaddheader(path, header_text, footer_text):
 
     for page_num, page in enumerate(pages, start=1):
         canvas.doForm(makerl(canvas, page))
-
-        footer_nombre = f"{page_num}/{len(pages)}"
+        # footer_nombre = f"{page_num}/{len(pages)}"
         # header_text = r"ヘッダーのテスト"
         # footer_text = r"フッターのテスト"
         canvas.saveState()
         canvas.setStrokeColorRGB(0, 0, 0)
         canvas.setFont(font_name, 14)
-        canvas.drawString(1, 830, header_text)
-        canvas.drawString(290, 10, footer_nombre)
+        # PDFの高さ-10
+        pdf_size = get_mediabox(page)[3] - 11
+        # canvas.drawString(1, 830, header_text)
+        canvas.drawString(1, pdf_size, header_text)
+        # canvas.drawString(290, 10, footer_nombre)
         canvas.drawString(1, 1, footer_text)
         canvas.restoreState()
         canvas.showPage()
 
     canvas.save()
+
+
+def get_mediabox(page):
+    fs = []
+    # pages2 = PdfReader(input_file).pages だと、MediaBox
+    # mbox = page.MediaBox or page.inheritable.MediaBox
+    # pages = [pagexobj(p) for p in reader.pages] だと BBox
+    mbox = page.BBox or page.inheritable.BBox
+    for m in mbox:
+        fs.append(float(m))
+    return fs
+
 
 # コマンドライン引数を処理する
 if __name__ == '__main__':
